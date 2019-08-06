@@ -1,29 +1,34 @@
-package com.andrew_flower.example;
+package com.andrew_flower.demo.util;
 
 import org.apache.logging.log4j.*;
 import org.apache.logging.log4j.core.*;
 import org.apache.logging.log4j.core.appender.*;
 import org.apache.logging.log4j.core.config.*;
+import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.io.*;
 
 /**
+ * A Custom Appender for Log4j2 that logs to a String. This is useful for testing logging.
+ *
  * @author rewolf
  */
 public class StringAppender extends AbstractOutputStreamAppender<StringAppender.StringOutputStreamManager> {
-    static LoggerContext context = (LoggerContext) LogManager.getContext(false);
-    static Configuration configuration = context.getConfiguration();
-    StringOutputStreamManager manager;
+    private static LoggerContext context = (LoggerContext) LogManager.getContext(false);
+    private static Configuration configuration = context.getConfiguration();
+    private StringOutputStreamManager manager;
 
     private StringAppender(String name, Layout<? extends Serializable> layout, Filter filter, StringOutputStreamManager manager, boolean ignoreExceptions, boolean immediateFlush) {
         super(name, layout, filter, ignoreExceptions, immediateFlush, manager);
         this.manager = manager;
     }
 
-    public static StringAppender createStringAppender(String nullablePatternString) {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        PatternLayout layout;
+    @PluginFactory
+    public static StringAppender createStringAppender(final String nullablePatternString) {
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        final PatternLayout layout;
+
         if (nullablePatternString == null) {
             layout = PatternLayout.createDefaultLayout();
         } else {
@@ -39,13 +44,13 @@ public class StringAppender extends AbstractOutputStreamAppender<StringAppender.
                 true);
     }
 
-    public void addToLogger(String loggerName, Level level) {
+    public void addToLogger(final String loggerName, final Level level) {
         LoggerConfig loggerConfig = configuration.getLoggerConfig(loggerName);
         loggerConfig.addAppender(this, level, null);
         context.updateLoggers();
     }
 
-    public void removeFromLogger(String loggerName) {
+    public void removeFromLogger(final String loggerName) {
         LoggerConfig loggerConfig = configuration.getLoggerConfig(loggerName);
         loggerConfig.removeAppender("StringAppender");
         context.updateLoggers();
@@ -59,15 +64,15 @@ public class StringAppender extends AbstractOutputStreamAppender<StringAppender.
     /**
      * StringOutputStreamManager to manage an in memory byte-stream representing our stream
      */
-    protected static class StringOutputStreamManager extends OutputStreamManager {
+    static class StringOutputStreamManager extends OutputStreamManager {
         ByteArrayOutputStream stream;
 
-        protected StringOutputStreamManager(ByteArrayOutputStream os, String streamName, Layout<?> layout) {
+        StringOutputStreamManager(ByteArrayOutputStream os, String streamName, Layout<?> layout) {
             super(os, streamName, layout);
             stream = os;
         }
 
-        public ByteArrayOutputStream getStream() {
+        ByteArrayOutputStream getStream() {
             return stream;
         }
     }

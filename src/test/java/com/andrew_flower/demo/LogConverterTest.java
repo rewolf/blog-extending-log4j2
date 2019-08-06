@@ -1,6 +1,8 @@
-package com.andrew_flower.example;
+package com.andrew_flower.demo;
 
 
+import com.andrew_flower.demo.logging.RequestIdConverter;
+import com.andrew_flower.demo.util.StringAppender;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,42 +15,42 @@ import static org.junit.Assert.assertEquals;
  * @author rewolf
  */
 public class LogConverterTest {
-    private final static String STUB_REQ_ID = "Haro-I-Id";
+    private final static String STUB_REQUEST_ID = "Haro-I-Id";
 
     @Before
     public void setup() {
-        MythicalApplicationRequestHandler stub = new MythicalApplicationRequestHandler() {
+        HypotheticalApplicationRequestHandler stub = new HypotheticalApplicationRequestHandler() {
             @Override
             public String getCurrentRequestId() {
-                return STUB_REQ_ID;
+                return STUB_REQUEST_ID;
             }
         };
-        MythicalApplicationRequestHandler.setInstance(stub);
+        HypotheticalApplicationRequestHandler.setInstance(stub);
     }
 
     @Test
-    public void formatAppendsRequestId() throws Exception {
-        ReqIdConverter converter = ReqIdConverter.newInstance(new String[]{});
+    public void formatAppendsRequestId() {
+        RequestIdConverter converter = RequestIdConverter.newInstance(new String[]{});
         StringBuilder message = new StringBuilder().append("BEFORE_");
 
         converter.format(null, message);
 
-        assertEquals("BEFORE_" + STUB_REQ_ID, message.toString());
+        assertEquals("BEFORE_" + STUB_REQUEST_ID, message.toString());
     }
 
     @Test
-    public void logReplacesKeyWithReqId() throws Exception {
+    public void logReplacesKeyWithRequestId() {
         // Get the RootLogger which, if you don't have log4j2-test.xml defined, will only log ERRORs
         Logger logger = LogManager.getRootLogger();
         // Create a String Appender to capture log output
-        StringAppender appender = StringAppender.createStringAppender("[%reqId] %m");
+        StringAppender appender = StringAppender.createStringAppender("[%requestId] %m");
         appender.addToLogger(logger.getName(), Level.INFO);
         appender.start();
 
         // Log to the string appender
         logger.error("Test");
 
-        assertEquals("[" + STUB_REQ_ID + "] Test", appender.getOutput());
+        assertEquals("[" + STUB_REQUEST_ID + "] Test", appender.getOutput());
         appender.removeFromLogger(LogManager.getRootLogger().getName());
     }
 }
