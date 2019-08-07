@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
  * @author rewolf
  */
 public class LogConverterTest {
-    private final static String STUB_REQUEST_ID = "Haro-I-Id";
+    private final static String STUB_REQUEST_ID = "this-is-a-request-id";
 
     @Before
     public void setup() {
