@@ -19,11 +19,16 @@ public class StringAppender extends AbstractOutputStreamAppender<StringAppender.
     private static Configuration configuration = context.getConfiguration();
     private StringOutputStreamManager manager;
 
-    private StringAppender(String name, Layout<? extends Serializable> layout, Filter filter, StringOutputStreamManager manager, boolean ignoreExceptions, boolean immediateFlush) {
-        super(name, layout, filter, ignoreExceptions, immediateFlush, manager);
+    private StringAppender(String name, Layout<? extends Serializable> layout, StringOutputStreamManager manager, boolean ignoreExceptions, boolean immediateFlush) {
+        super(name, layout, null, ignoreExceptions, immediateFlush, null,manager);
         this.manager = manager;
     }
 
+    /**
+     * Create a StringAppender with a given output format
+     * @param nullablePatternString Can be {@code null}. The PatternLayout string for log output.
+     * @return a new StringAppender
+     */
     @PluginFactory
     public static StringAppender createStringAppender(final String nullablePatternString) {
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -32,13 +37,14 @@ public class StringAppender extends AbstractOutputStreamAppender<StringAppender.
         if (nullablePatternString == null) {
             layout = PatternLayout.createDefaultLayout();
         } else {
-            layout = PatternLayout.createLayout(nullablePatternString, configuration, null, null, true, false, null, null);
+            layout = PatternLayout.newBuilder()
+                    .withPattern(nullablePatternString)
+                    .build();
         }
 
         return new StringAppender(
                 "StringAppender",
                 layout,
-                null,
                 new StringOutputStreamManager(outputStream, "StringStream", layout),
                 false,
                 true);
@@ -68,7 +74,7 @@ public class StringAppender extends AbstractOutputStreamAppender<StringAppender.
         ByteArrayOutputStream stream;
 
         StringOutputStreamManager(ByteArrayOutputStream os, String streamName, Layout<?> layout) {
-            super(os, streamName, layout);
+            super(os, streamName, layout, false);
             stream = os;
         }
 
